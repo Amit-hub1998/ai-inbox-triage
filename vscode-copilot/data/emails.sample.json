@@ -1,0 +1,56 @@
+{
+  "fetched_at": "2026-11-11T08:10:00",
+  "total": 7,
+  "counts": { "need": 2, "urgent": 1, "overdue": 1, "fyi": 2, "auto": 1 },
+  "emails": [
+    {
+      "id": "s1", "from": "Priya Nair", "from_email": "priya.nair@hsbc.com",
+      "subject": "Q3 PD recalibration numbers", "received": "2026-11-11 07:40",
+      "unread": true, "importance": 2, "bucket": "need", "needs_ai": true,
+      "body": "Hi, can you share the updated default rates before the committee pack is locked? Need the recalibrated PD table today if possible.",
+      "enrichment": { "priority": "High", "summary": "Priya needs the updated PD default rates before the committee pack is finalised.", "action": "Reply with the recalibrated PD table", "reply": "Sharing the v2 PD table now; two segments are still under review, flagged inline.", "next_steps": ["Attach recalibrated figures", "Note the 2 pending segments"], "ai": true }
+    },
+    {
+      "id": "s2", "from": "James O'Brien", "from_email": "james.obrien@hsbc.com",
+      "subject": "ERD walkthrough availability", "received": "2026-11-10 16:20",
+      "unread": true, "importance": 1, "bucket": "need", "needs_ai": true,
+      "body": "Which afternoon works for the ERD knowledge-transfer session this week?",
+      "enrichment": { "priority": "Medium", "summary": "James is asking when you can run the ERD knowledge-transfer session.", "action": "Confirm a slot", "reply": "Thursday 3pm works — I'll share the ERD draft beforehand.", "next_steps": ["Pick a slot", "Share ERD draft link"], "ai": true }
+    },
+    {
+      "id": "s3", "from": "line.manager", "from_email": "line.manager@hsbc.com",
+      "subject": "BRD sign-off needed EOD", "received": "2026-11-11 08:02",
+      "unread": true, "importance": 2, "bucket": "urgent", "needs_ai": true,
+      "body": "Sprint is blocked until you confirm the collateral field mappings are final. Need it by EOD.",
+      "enrichment": { "priority": "High", "summary": "Your manager needs confirmation the collateral field mappings are final; the sprint is blocked.", "action": "Confirm mappings are final by EOD", "reply": "Mappings are final — one caveat on the collateral field, noted below.", "next_steps": ["Re-check collateral mapping", "Reply confirming", "Flag the caveat"], "ai": true }
+    },
+    {
+      "id": "s4", "from": "Model Governance", "from_email": "model.governance@hsbc.com",
+      "subject": "Validation evidence overdue", "received": "2026-11-10 09:15",
+      "unread": true, "importance": 2, "bucket": "overdue", "needs_ai": true,
+      "body": "The validation evidence pack was due yesterday and is now overdue. Please send as soon as possible.",
+      "enrichment": { "priority": "High", "summary": "The validation evidence pack is a day overdue and governance is chasing it.", "action": "Send the evidence pack now", "reply": "Apologies for the delay — evidence pack attached with a one-line index.", "next_steps": ["Attach evidence pack", "Index the documents"], "ai": true }
+    },
+    {
+      "id": "s5", "from": "HSBC Comms", "from_email": "comms@hsbc.com",
+      "subject": "Town hall recording available", "received": "2026-11-09 12:00",
+      "unread": true, "importance": 1, "bucket": "fyi", "needs_ai": false,
+      "body": "The recording and slides from the quarterly town hall are now posted on the intranet.",
+      "enrichment": { "priority": "Low", "summary": "Quarterly town hall recording and slides are posted.", "action": "No action — read when free", "reply": "", "next_steps": [], "ai": false }
+    },
+    {
+      "id": "s6", "from": "Data Platform", "from_email": "no-reply@hsbc.com",
+      "subject": "PySpark cluster maintenance Saturday", "received": "2026-11-09 10:30",
+      "unread": true, "importance": 1, "bucket": "fyi", "needs_ai": false,
+      "body": "Planned downtime Saturday 2-4am. No action needed unless you have jobs scheduled in that window.",
+      "enrichment": { "priority": "Low", "summary": "Planned PySpark cluster downtime Saturday 2-4am.", "action": "Check for scheduled Saturday jobs", "reply": "", "next_steps": [], "ai": false }
+    },
+    {
+      "id": "s7", "from": "ServiceNow", "from_email": "servicenow@hsbc.com",
+      "subject": "W-44821 access request assigned to you", "received": "2026-11-11 06:00",
+      "unread": true, "importance": 1, "bucket": "auto", "needs_ai": false,
+      "body": "Ticket W-44821 has been assigned to your queue. Standard SLA applies.",
+      "enrichment": { "priority": "Routine", "summary": "Auto-generated access-request ticket assigned to your queue.", "action": "Triage in ServiceNow, not email", "reply": "", "next_steps": ["Open in ServiceNow"], "ai": false }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Node / VS Code extension
+node_modules/
+out/
+*.vsix
+
+# Local data — real mail never gets committed
+**/data/emails.json
+**/data/results.json
+*.local.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/settings.json

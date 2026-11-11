@@ -1,0 +1,30 @@
+{
+  "name": "inbox-triage-brain",
+  "displayName": "Inbox Triage Brain",
+  "description": "Summarizes and prioritizes fetched Outlook emails using the Copilot model via the VS Code Language Model API.",
+  "version": "0.1.0",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "inboxTriage.enrich",
+        "title": "Inbox Triage: Enrich emails"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.90.0",
+    "typescript": "^5.4.0"
+  }
+}

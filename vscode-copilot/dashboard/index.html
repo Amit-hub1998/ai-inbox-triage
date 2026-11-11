@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Inbox triage</title>
+<style>
+  :root{
+    --bg:#faf9f7; --surface:#ffffff; --surface-soft:#f3f1ec;
+    --text:#1a1a18; --text-2:#5f5e5a; --text-muted:#908e87;
+    --border:#e5e3dc; --border-strong:#d3d1c7;
+    --need:#2f74c0; --urgent:#d6433f; --overdue:#b5781a; --fyi:#6f6e68; --auto:#1a8a6b;
+    --radius:10px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#1a1a19; --surface:#232320; --surface-soft:#2b2b27;
+      --text:#f0efec; --text-2:#b8b6ad; --text-muted:#8a8980;
+      --border:#34332e; --border-strong:#45443d;
+      --need:#5a9ae5; --urgent:#e46b67; --overdue:#d49a3a; --fyi:#9a988f; --auto:#3bb189;
+    }
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    font-size:14px;line-height:1.5;padding:20px;max-width:1280px;margin:0 auto;}
+  h1{font-size:20px;font-weight:500;margin:0;}
+  button{font-family:inherit;font-size:13px;background:var(--surface);color:var(--text);
+    border:0.5px solid var(--border-strong);border-radius:var(--radius);padding:7px 12px;
+    cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+  button:hover{background:var(--surface-soft);}
+  input,select{font-family:inherit;font-size:13px;background:var(--surface);color:var(--text);
+    border:0.5px solid var(--border);border-radius:var(--radius);padding:8px 10px;}
+  input:focus,select:focus{outline:none;border-color:var(--need);}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .muted{color:var(--text-muted);font-size:12px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .card{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:12px 14px;}
+  .soft{background:var(--surface-soft);border:none;border-radius:12px;padding:12px 14px;}
+  .buckets{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .bucket{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;
+    padding:12px 14px;cursor:pointer;text-align:left;transition:border-color .12s;}
+  .bucket:hover{border-color:var(--border-strong);}
+  .bucket.active{border-width:2px;padding:11px 13px;}
+  .bnum{font-size:26px;font-weight:500;line-height:1;}
+  .blabel{font-size:12px;color:var(--text-2);display:flex;align-items:center;gap:6px;margin-top:4px;}
+  .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .erow{border:0.5px solid var(--border);border-radius:10px;padding:9px 11px;cursor:pointer;margin-bottom:8px;transition:border-color .12s;}
+  .erow:hover{border-color:var(--border-strong);}
+  .erow.sel{border-width:1.5px;}
+  .pill{font-size:11px;padding:3px 9px;border-radius:999px;white-space:nowrap;}
+  .runway-item{display:flex;align-items:center;gap:8px;font-size:12px;padding:3px 0;}
+  table{width:100%;border-collapse:collapse;}
+  td{padding:3px 0;font-size:13px;vertical-align:top;}
+  .chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:999px;background:var(--surface-soft);color:var(--text-2);}
+  .ai-badge{font-size:10px;padding:1px 6px;border-radius:999px;background:var(--surface-soft);color:var(--text-muted);}
+  .panel{min-height:280px;}
+  .empty{color:var(--text-muted);font-size:13px;display:flex;align-items:center;justify-content:center;height:220px;text-align:center;}
+  @media (max-width:760px){.grid2{grid-template-columns:1fr;}.buckets{grid-template-columns:repeat(2,1fr);}}
+</style>
+</head>
+<body>
+
+<div class="row" style="margin-bottom:4px;">
+  <div>
+    <h1>Inbox focus <span class="muted" id="total">—</span></h1>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button id="refreshBtn">↻ <span id="refreshLabel">Refresh</span></button>
+    <button id="settingsBtn">⚙ Settings</button>
+  </div>
+</div>
+<div class="muted" id="syncLine" style="margin-bottom:14px;">Loading…</div>
+
+<div class="grid2" style="margin-bottom:14px;">
+  <div class="buckets" id="buckets"></div>
+  <div class="soft">
+    <div class="muted" style="margin-bottom:10px;">Deadline runway</div>
+    <div id="runway"></div>
+  </div>
+</div>
+
+<div style="display:flex;gap:8px;margin-bottom:14px;">
+  <input id="searchBox" type="text" placeholder="Search sender, subject, or message" style="flex:1;" />
+  <select id="prioFilter">
+    <option value="all">All emails</option>
+    <option value="need">Need reply</option>
+    <option value="urgent">Urgent</option>
+    <option value="overdue">Overdue</option>
+    <option value="fyi">FYI only</option>
+    <option value="auto">Automated</option>
+  </select>
+</div>
+
+<div class="grid2">
+  <div class="card panel">
+    <div id="listHeader" class="muted" style="font-weight:500;margin-bottom:10px;">Pick a bucket above</div>
+    <div id="emailList"></div>
+  </div>
+  <div class="card panel">
+    <div id="detail" class="empty">Select an email to see the full breakdown</div>
+  </div>
+</div>
+
+<div class="soft" id="settingsPanel" style="display:none;margin-top:14px;">
+  <div style="font-weight:500;margin-bottom:6px;">Your priority rules</div>
+  <div class="muted">Edit these in <code>backend/config.py</code> — high/low senders, high-priority
+  projects, and the ticket patterns that route to the Automated bucket. Changes apply on the next refresh.</div>
+</div>
+
+<script>
+const COLORS={need:'var(--need)',urgent:'var(--urgent)',overdue:'var(--overdue)',fyi:'var(--fyi)',auto:'var(--auto)'};
+const LABELS={need:'Need reply',urgent:'Urgent',overdue:'Overdue',fyi:'FYI only',auto:'Automated'};
+const BUCKET_ORDER=['need','urgent','overdue','fyi'];
+
+let state={emails:[],counts:{},total:0};
+let activeBucket=null, selId=null;
+
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+async function load(refresh){
+  const label=document.getElementById('refreshLabel');
+  if(refresh) label.textContent='Syncing…';
+  try{
+    const res = refresh
+      ? await fetch('/api/refresh',{method:'POST'})
+      : await fetch('/api/results');
+    state = await res.json();
+  }catch(e){
+    document.getElementById('syncLine').textContent='Could not reach server. Is server.py running?';
+    label.textContent='Refresh'; return;
+  }
+  label.textContent='Refresh';
+  render();
+}
+
+function render(){
+  document.getElementById('total').textContent = (state.total||0)+' messages';
+  const synced = state.fetched_at ? new Date(state.fetched_at).toLocaleString() : '—';
+  const ai = state.ai_run_at ? ' · AI '+new Date(state.ai_run_at).toLocaleTimeString() : ' · AI not run yet';
+  document.getElementById('syncLine').textContent='Last synced '+synced+ai;
+  if(state.error) document.getElementById('syncLine').textContent=state.error;
+
+  // buckets
+  const bm=document.getElementById('buckets'); bm.innerHTML='';
+  BUCKET_ORDER.forEach(k=>{
+    const n=(state.counts&&state.counts[k])||0;
+    const el=document.createElement('button');
+    el.className='bucket'+(activeBucket===k?' active':'');
+    el.style.borderColor = activeBucket===k ? COLORS[k] : '';
+    el.innerHTML=`<div class="bnum" style="color:${COLORS[k]}">${n}</div>
+      <div class="blabel"><span class="dot" style="background:${COLORS[k]}"></span>${LABELS[k]}</div>`;
+    el.onclick=()=>selectBucket(k);
+    bm.appendChild(el);
+  });
+
+  renderRunway();
+  if(activeBucket) renderList();
+}
+
+function renderRunway(){
+  const rm=document.getElementById('runway'); rm.innerHTML='';
+  // emails that have a deadline-ish bucket, newest deadlines implied by priority
+  const items=(state.emails||[]).filter(e=>['overdue','urgent','need'].includes(e.bucket)).slice(0,6);
+  if(!items.length){rm.innerHTML='<div class="muted">Nothing with a deadline right now.</div>';return;}
+  items.forEach(e=>{
+    const el=document.createElement('div');
+    el.className='runway-item';
+    el.innerHTML=`<span class="dot" style="background:${COLORS[e.bucket]}"></span>
+      <span style="flex:1">${esc(e.subject).slice(0,42)}</span>
+      <span class="muted">${esc(e.from).slice(0,18)}</span>`;
+    rm.appendChild(el);
+  });
+}
+
+function selectBucket(k){
+  activeBucket=k; selId=null;
+  document.getElementById('prioFilter').value=k;
+  document.getElementById('detail').className='empty';
+  document.getElementById('detail').textContent='Select an email to see the full breakdown';
+  render();
+}
+
+function currentItems(){
+  const q=document.getElementById('searchBox').value.toLowerCase();
+  let items=(state.emails||[]).filter(e=>e.bucket===activeBucket);
+  if(q) items=items.filter(e=>(e.from+e.subject+(e.body||'')).toLowerCase().includes(q));
+  return items;
+}
+
+function renderList(){
+  const header=document.getElementById('listHeader');
+  const items=currentItems();
+  header.textContent=`${LABELS[activeBucket]} — ${items.length} emails`;
+  const list=document.getElementById('emailList'); list.innerHTML='';
+  if(!items.length){list.innerHTML='<div class="muted">No emails match.</div>';return;}
+  items.forEach(e=>{
+    const en=e.enrichment||{};
+    const el=document.createElement('div');
+    el.className='erow'+(selId===e.id?' sel':'');
+    el.style.borderColor = selId===e.id ? COLORS[activeBucket] : '';
+    el.innerHTML=`<div class="row"><span style="font-weight:500;font-size:12px">${esc(e.from)}</span>
+      <span class="pill" style="color:${COLORS[activeBucket]};background:var(--surface-soft)">${esc(en.priority||'')}</span></div>
+      <div style="font-size:13px;margin:3px 0">${esc(e.subject)}</div>
+      <div class="muted" style="line-height:1.5">${esc(en.summary||'')}</div>
+      <div class="muted" style="margin-top:4px">→ ${esc(en.action||'')} ${en.ai?'':'<span class="ai-badge">rules</span>'}</div>`;
+    el.onclick=()=>{selId=e.id; renderList(); renderDetail(e);};
+    list.appendChild(el);
+  });
+}
+
+function renderDetail(e){
+  const en=e.enrichment||{};
+  const d=document.getElementById('detail');
+  d.className='';
+  d.innerHTML=`
+    <div class="row" style="align-items:flex-start;margin-bottom:12px">
+      <div style="font-size:15px;font-weight:500;line-height:1.3">${esc(e.subject)}</div>
+      <span class="pill" style="color:${COLORS[e.bucket]};background:var(--surface-soft)">${esc(en.priority||'')}</span>
+    </div>
+    <table style="margin-bottom:12px">
+      <tr><td class="muted" style="width:80px">From</td><td>${esc(e.from)} ${e.from_email?'<span class="muted">&lt;'+esc(e.from_email)+'&gt;</span>':''}</td></tr>
+      <tr><td class="muted">Received</td><td>${esc(e.received||'—')}</td></tr>
+      <tr><td class="muted">Bucket</td><td>${LABELS[e.bucket]}</td></tr>
+    </table>
+    <div class="muted" style="margin-bottom:4px">Suggested reply ${en.ai?'<span class="chip">Copilot</span>':'<span class="chip">rules fallback</span>'}</div>
+    <div class="soft" style="font-size:13px;line-height:1.6;margin-bottom:12px">${esc(en.reply||'(no suggested reply)')}</div>
+    <div class="muted" style="margin-bottom:5px">Next steps</div>
+    <div style="margin-bottom:6px">${(en.next_steps&&en.next_steps.length)?en.next_steps.map(n=>`<div style="font-size:13px;margin-bottom:3px">✓ ${esc(n)}</div>`).join(''):'<div class="muted" style="font-size:13px">—</div>'}</div>`;
+}
+
+document.getElementById('searchBox').oninput=()=>{if(activeBucket)renderList();};
+document.getElementById('prioFilter').onchange=ev=>selectBucket(ev.target.value);
+document.getElementById('settingsBtn').onclick=()=>{const p=document.getElementById('settingsPanel');p.style.display=p.style.display==='none'?'block':'none';};
+document.getElementById('refreshBtn').onclick=()=>load(true);
+
+load(false).then(()=>{ if(!activeBucket) selectBucket('need'); });
+</script>
+</body>
+</html>
